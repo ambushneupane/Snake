@@ -94,13 +94,6 @@ class SNAKE:
 
 
 
-
-
-
-
-
-
-
     def move_snake(self):
         body_copy= self.body[:-1]
         body_copy.insert(0,body_copy[0]+self.direction)
@@ -136,13 +129,13 @@ class MAIN:
         self.collision()
         self.destruction()
     def draw_element(self):
+        self.draw_grass()
         self.fruit.draw_fruit()
         self.snake.draw_snake()
+        self.draw_score()
+
     def collision(self):
-        self.score = 0
         if self.fruit.pos == self.snake.body[0]: #head of the snake overlaps the fruit
-            self.score +=1
-            print(self.score)
             self.fruit.randomize()
             self.snake.add_block()
 
@@ -155,6 +148,30 @@ class MAIN:
         for block in self.snake.body[1:]:
             if block == self.snake.body[0]:
                 self.game_over()
+
+    def draw_grass(self):
+        grass_color=(167,209,61)
+        for row in range(cell_number):
+            if row % 2 == 0:
+              for col in range(cell_number):
+                  if col %2 ==0:
+                    grass_rect= pygame.Rect(col*cell_size,row*cell_size,cell_size,cell_size)
+                    pygame.draw.rect(screen,grass_color,grass_rect)
+
+            else:
+                for col in range(cell_number):
+                    if col % 2 != 0:
+                        grass_rect = pygame.Rect(col * cell_size, row * cell_size, cell_size, cell_size)
+                        pygame.draw.rect(screen, grass_color, grass_rect)
+
+
+    def draw_score(self):
+        score_text= str(len(self.snake.body)-3)
+        score_surface= game_font.render(score_text,1,(56,74,12))
+        score_x_pos= int(cell_size*cell_number -60)
+        score_y_pos= int(cell_size*cell_number -40)
+        score_rect= score_surface.get_rect(center=(score_x_pos,score_y_pos))
+        screen.blit(score_surface,score_rect)
 
     def game_over(self):
         pygame.quit()
@@ -169,11 +186,10 @@ screen = pygame.display.set_mode((cell_number*cell_size,cell_number*cell_size))
 pygame.display.set_caption("Snake Game")
 clock= pygame.time.Clock()
 
+game_font= pygame.font.Font(None,95)
+
+
 fruit_img= pygame.image.load('Images/apple.png').convert_alpha()
-
-
-
-
 main_game= MAIN()
 #timer
 screen_update=pygame.USEREVENT
