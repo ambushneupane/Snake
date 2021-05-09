@@ -4,7 +4,7 @@ from pygame.math import Vector2
 class SNAKE:
     def __init__(self):
         self.body=[Vector2(5,10),Vector2(4,10),Vector2(3,10)] #[(200,400),(240,400),(280,400) adding 40 ]
-        self.direction= Vector2(1,0)
+        self.direction= Vector2(0,0)
 
         self.body_bl = pygame.image.load('Images/body_bl.png').convert_alpha()
         self.body_br = pygame.image.load('Images/body_br.png').convert_alpha()
@@ -22,6 +22,8 @@ class SNAKE:
         self.tail_left = pygame.image.load('Images/tail_left.png').convert_alpha()
         self.tail_right= pygame.image.load('Images/tail_right.png').convert_alpha()
         self.tail_up= pygame.image.load('Images/tail_up.png').convert_alpha()
+
+        self.crunch_sound=pygame.mixer.Sound('Sound_crunch.wav')
 
     def draw_snake(self):
         self.upade_head_graphics()
@@ -104,6 +106,17 @@ class SNAKE:
          body_copy.insert(0, body_copy[0] + self.direction)
          self.body=body_copy[:]
 
+    def play_sound(self):
+        self.crunch_sound.play()
+
+    def reset(self):
+
+        self.body = [Vector2(5, 10), Vector2(4, 10), Vector2(3, 10)]  # [(200,400),(240,400),(280,400) adding 40 ]
+        self.direction= Vector2(0,0)
+
+
+
+
 class FRUIT:
     def __init__(self):
         self.randomize()
@@ -138,6 +151,11 @@ class MAIN:
         if self.fruit.pos == self.snake.body[0]: #head of the snake overlaps the fruit
             self.fruit.randomize()
             self.snake.add_block()
+            self.snake.play_sound()
+
+        for block in self.snake.body[1:]:
+            if block == self.fruit.pos:
+                self.fruit.randomize()
 
     def destruction(self):
         #Snake dies when it collides with the border of the screen
@@ -171,22 +189,30 @@ class MAIN:
         score_x_pos= int(cell_size*cell_number -60)
         score_y_pos= int(cell_size*cell_number -40)
         score_rect= score_surface.get_rect(center=(score_x_pos,score_y_pos))
+        apple_rect=fruit_img.get_rect(midright=(score_rect.left,score_rect.centery-5))
+        bg_rect= pygame.Rect(apple_rect.left, apple_rect.top,apple_rect.width+score_rect.width+10,apple_rect.height)
+
+        pygame.draw.rect(screen,(168,209,61),bg_rect)
         screen.blit(score_surface,score_rect)
+        screen.blit(fruit_img,apple_rect)
+        pygame.draw.rect(screen, (10, 2 , 3), bg_rect,2)
 
     def game_over(self):
-        pygame.quit()
-        sys.exit()
+
+        self.snake.reset()
+
 
 
 pygame.init()
-cell_size=40
-cell_number=19
+pygame.mixer.pre_init(44100,-16,2,512)
+cell_size=35
+cell_number=20
 # WIDTH,HEIGHT= 400,500
 screen = pygame.display.set_mode((cell_number*cell_size,cell_number*cell_size))
 pygame.display.set_caption("Snake Game")
 clock= pygame.time.Clock()
 
-game_font= pygame.font.Font(None,95)
+game_font= pygame.font.Font(None,50)
 
 
 fruit_img= pygame.image.load('Images/apple.png').convert_alpha()
